@@ -9,14 +9,16 @@ use Inertia\Inertia;
 class AiController extends Controller
 {
     public function index() {
-        return Inertia::render('Index');
+        return Inertia::render('Index', [
+            'plan' => ' '
+        ]);
     }
 
     public function makeRequest(Request $request) {
         $apiKey = env('API_KEY');
         $client = OpenAI::client($apiKey);
 
-        $user_message = "I'm $request->age years old $request->gender, and I weight around $request->weight kg. I want to work out $request->place $request->frequency, focusing on $request->focus. My goal is $request->goal.";
+        $user_message = "Make me a workout plan based on the following: I'm $request->age years old $request->gender, and I weight around $request->weight kg. I want to work out $request->place $request->frequency, focusing on $request->focus. My goal is $request->goal.";
         
         if($request->extra != null){
             $user_message = "$user_message And the following should also be taken into account: $request->extra";
@@ -30,8 +32,11 @@ class AiController extends Controller
         ]);
 
         $messageContent = $result['choices'][0]['message']['content'];
+        $lines = explode("\n", $messageContent);
 
-        dd($messageContent);
+        return Inertia::render('Plan', [
+            'plan' => $lines
+        ]);
         
     }
 }
